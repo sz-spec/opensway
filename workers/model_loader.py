@@ -152,11 +152,14 @@ class ModelPool:
     def _load_ltx_video(self):
         from diffusers import LTXPipeline
         import torch
+        # bfloat16 works on MPS (Apple Silicon) and CUDA; fall back to float32 on CPU
+        dtype = torch.bfloat16 if self.device in ("mps", "cuda") else torch.float32
         pipe = LTXPipeline.from_pretrained(
             "Lightricks/LTX-Video",
-            torch_dtype=torch.bfloat16,
+            torch_dtype=dtype,
         )
         pipe = pipe.to(self.device)
+        pipe.enable_attention_slicing()
         return pipe
 
     def _load_hunyuan_video(self):

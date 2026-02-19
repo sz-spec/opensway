@@ -149,6 +149,22 @@ def voice_isolation(self, task_id: str):
         db.close()
 
 
+import threading as _threading
+_audiogen_lock  = _threading.Lock()
+_audiogen_model = None
+
+
+def _get_audiogen():
+    """Load AudioGen once and reuse; serialised with a lock to prevent
+    concurrent from_pretrained calls that trigger the meta-tensor race."""
+    global _audiogen_model
+    with _audiogen_lock:
+        if _audiogen_model is None:
+            from audiocraft.models import AudioGen
+            _audiogen_model = AudioGen.get_pretrained("facebook/audiogen-medium")
+    return _audiogen_model
+
+
 @celery_app.task(bind=True, name="workers.audio_worker.sound_effect")
 def sound_effect(self, task_id: str):
     db = SessionLocal()
@@ -165,13 +181,12 @@ def sound_effect(self, task_id: str):
         prompt = inp.get("promptText", "")
         duration = inp.get("duration", 5.0)
 
-        from audiocraft.models import AudioGen
-        from audiocraft.data.audio import audio_write
-        import io, soundfile as sf, torch
+        import io, soundfile as sf
 
-        model = AudioGen.get_pretrained("facebook/audiogen-medium")
+        model = _get_audiogen()
         model.set_generation_params(duration=duration)
-        wav = model.generate([prompt])  # shape (1, 1, samples)
+        with _audiogen_lock:                   # inference also serialised
+            wav = model.generate([prompt])     # shape (1, 1, samples)
         audio = wav[0, 0].cpu().numpy()
 
         buf = io.BytesIO()
