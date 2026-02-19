@@ -105,7 +105,7 @@ SCENES = [
 SCENE_DURATION = 8    # seconds per scene  (24 × 8 = 192 s)
 MUSIC_CLIPS    = 7    # 7 × 30 s = 210 s covers full film
 MUSIC_DURATION = 30   # AudioGen max per call
-VIDEO_RATIO    = "768:432"
+VIDEO_RATIO    = "768:448"  # both divisible by 32 (LTX-Video requirement)
 OUT_FILENAME   = "opensway_demo_long.mp4"
 
 # ── API helpers ───────────────────────────────────────────────────────────────
@@ -299,7 +299,7 @@ def main():
     music_urls = []
     for i, mid in enumerate(music_ids, 1):
         print(f"      Music {i}…", end=" ", flush=True)
-        murl = wait(mid, label=f"Music {i}", headers=headers, poll=10, timeout=600)
+        murl = wait(mid, label=f"Music {i}", headers=headers, poll=10, timeout=2400)
         music_urls.append(murl)
         print(f"✓ {murl.split('/')[-1]}")
 
