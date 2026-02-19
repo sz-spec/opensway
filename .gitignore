@@ -1,0 +1,27 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Database
+*.db
+*.sqlite3
+
+# Outputs / uploads
+outputs/
+
+# Environment
+.env
+*.env
+
+# Node
+ui/node_modules/
+ui/.next/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log

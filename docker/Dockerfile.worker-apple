@@ -1,0 +1,18 @@
+# Apple Silicon (MPS) worker — for local Mac development
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg libsndfile1 git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+# Install PyTorch with MPS support (macOS wheel)
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV DEVICE_BACKEND=mps
+ENV PYTORCH_ENABLE_MPS_FALLBACK=1
+
+COPY . .

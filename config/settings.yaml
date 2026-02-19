@@ -1,0 +1,48 @@
+app:
+  name: OpenSway
+  version: "1.0.0"
+  api_version: "2024-11-06"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+
+device:
+  # auto | mps | cuda | cpu
+  backend: auto
+  vram_gb: 0  # 0 = auto-detect
+
+database:
+  url: "postgresql://opensway:opensway@localhost:5432/opensway"
+  # Override with DATABASE_URL env var
+
+redis:
+  url: "redis://localhost:6379/0"
+  # Override with REDIS_URL env var
+
+storage:
+  # minio | s3 | local
+  backend: local
+  local_path: "./outputs"
+  public_base_url: "http://localhost:8000/outputs"
+
+  minio:
+    endpoint: "localhost:9000"
+    access_key: "minioadmin"
+    secret_key: "minioadmin"
+    bucket: "opensway"
+    secure: false
+
+  s3:
+    bucket: "opensway"
+    region: "us-east-1"
+
+tasks:
+  max_poll_seconds: 600
+  default_timeout: 600
+  webhook_timeout: 10
+
+credits:
+  default_balance: 10000
+  free_tier_balance: 100

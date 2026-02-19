@@ -1,0 +1,140 @@
+models:
+  # Video generation
+  ltx_video:
+    family: video
+    endpoint: image_to_video
+    vram_gb: 8
+    supports: [mps, cuda, cpu]
+    repo: Lightricks/LTX-Video
+    credits_per_second: 5
+
+  ltx_video_text:
+    family: video
+    endpoint: text_to_video
+    vram_gb: 8
+    supports: [mps, cuda, cpu]
+    repo: Lightricks/LTX-Video
+    credits_per_second: 5
+
+  hunyuan_video:
+    family: video
+    endpoint: image_to_video
+    vram_gb: 14
+    supports: [cuda]
+    repo: Tencent-Hunyuan/HunyuanVideo
+    credits_per_second: 10
+
+  cogvideox:
+    family: video
+    endpoint: image_to_video
+    vram_gb: 12
+    supports: [cuda]
+    repo: zai-org/CogVideo
+    credits_per_second: 8
+
+  animatediff:
+    family: video
+    endpoint: video_to_video
+    vram_gb: 10
+    supports: [cuda]
+    repo: guoyww/AnimateDiff
+    credits_per_second: 8
+
+  # Image generation
+  flux_schnell:
+    family: image
+    endpoint: text_to_image
+    vram_gb: 8
+    supports: [mps, cuda, cpu]
+    repo: black-forest-labs/FLUX.1-schnell
+    credits_per_image: 2
+
+  flux_dev:
+    family: image
+    endpoint: text_to_image
+    vram_gb: 16
+    supports: [cuda]
+    repo: black-forest-labs/FLUX.1-dev
+    credits_per_image: 5
+
+  sd35_large:
+    family: image
+    endpoint: text_to_image
+    vram_gb: 10
+    supports: [cuda]
+    repo: stabilityai/stable-diffusion-3.5-large
+    credits_per_image: 4
+
+  # Character performance
+  live_portrait:
+    family: character
+    endpoint: character_performance
+    vram_gb: 4
+    supports: [mps, cuda, cpu]
+    repo: KwaiVGI/LivePortrait
+    credits_per_second: 5
+
+  musetalk:
+    family: character
+    endpoint: character_performance
+    vram_gb: 6
+    supports: [cuda]
+    repo: TMElyralab/MuseTalk
+    credits_per_second: 5
+
+  sadtalker:
+    family: character
+    endpoint: character_performance
+    vram_gb: 4
+    supports: [cuda]
+    repo: OpenTalker/SadTalker
+    credits_per_second: 4
+
+  # TTS
+  kokoro:
+    family: audio
+    endpoint: text_to_speech
+    vram_gb: 1
+    supports: [mps, cuda, cpu]
+    repo: hexgrad/kokoro
+    credits_per_second: 1
+
+  f5_tts:
+    family: audio
+    endpoint: text_to_speech
+    vram_gb: 4
+    supports: [mps, cuda]
+    repo: SWivid/F5-TTS
+    credits_per_second: 2
+
+  rvc:
+    family: audio
+    endpoint: speech_to_speech
+    vram_gb: 4
+    supports: [cuda, cpu]
+    repo: RVC-Project/Retrieval-based-Voice-Conversion-WebUI
+    credits_per_second: 2
+
+  audiocraft_audiogen:
+    family: audio
+    endpoint: sound_effect
+    vram_gb: 4
+    supports: [cuda, cpu]
+    repo: facebookresearch/audiocraft
+    credits_per_second: 2
+
+  demucs:
+    family: audio
+    endpoint: voice_isolation
+    vram_gb: 4
+    supports: [mps, cuda, cpu]
+    repo: facebookresearch/demucs
+    credits_per_second: 1
+
+  dubbing_pipeline:
+    family: audio
+    endpoint: voice_dubbing
+    vram_gb: 6
+    supports: [cuda, cpu]
+    repo: m-bain/whisperX + SWivid/F5-TTS
+    credits_per_minute: 20
