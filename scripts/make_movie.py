@@ -217,7 +217,7 @@ def main():
     print(f"  Scenes: {len(SCENES)} × {SCENE_DURATION}s = {len(SCENES)*SCENE_DURATION}s")
     print("═" * 64)
 
-    # 1. TTS narration (fire and forget, wait at the end)
+    # 1. TTS narration (fire and forget — tiny model, done in seconds)
     print("\n[1/4] Narration (TTS Kokoro)…")
     tts_id = submit("/v1/text_to_speech", {
         "promptText": NARRATION,
@@ -226,26 +226,14 @@ def main():
     }, headers)
     print(f"      → {tts_id}")
 
-    # 2. Background music (fire and forget)
-    print(f"\n[2/4] Background music ({MUSIC_CLIPS} × {MUSIC_DURATION} s AudioGen)…")
-    music_ids = []
-    for i in range(MUSIC_CLIPS):
-        mid = submit("/v1/sound_effect", {
-            "promptText": "cinematic ambient orchestral music, sweeping strings, soft synth pads, emotional, dreamlike",
-            "duration": MUSIC_DURATION,
-            "model": "audiocraft_audiogen",
-        }, headers)
-        music_ids.append(mid)
-        print(f"      clip {i+1} → {mid}")
-
-    # 3. Scenes — sequential (models not concurrent-safe)
+    # 2. Scenes — sequential FIRST so AudioGen doesn't compete with LTX-Video
     n = len(SCENES)
     scene_urls   = []
     scene_types  = []
     scene_suffix = []
 
     if use_video:
-        print(f"\n[3/4] Generating {n} video clips (LTX-Video, {VIDEO_RATIO}, {SCENE_DURATION}s each)…")
+        print(f"\n[2/4] Generating {n} video clips (LTX-Video, {VIDEO_RATIO}, {SCENE_DURATION}s each)…")
         print("      Note: first clip loads the model (~2 min); subsequent clips are faster.")
         for i, scene in enumerate(SCENES, 1):
             print(f"  Scene {i:02d}/{n}: {scene[:62]}…", end=" ", flush=True)
@@ -270,13 +258,13 @@ def main():
                     "ratio": "512:512",
                 }, headers)
                 url = wait(img_id, label=f"Scene {i} IMG", headers=headers,
-                           poll=5, timeout=120)
+                           poll=5, timeout=300)
                 scene_urls.append(url)
                 scene_types.append("image")
                 scene_suffix.append(".png")
                 print(f"  ↳ image ✓ {url.split('/')[-1]}")
     else:
-        print(f"\n[3/4] Generating {n} scene images (SDXL-Turbo)…")
+        print(f"\n[2/4] Generating {n} scene images (SDXL-Turbo)…")
         for i, scene in enumerate(SCENES, 1):
             print(f"  Scene {i:02d}/{n}: {scene[:62]}…", end=" ", flush=True)
             img_id = submit("/v1/text_to_image", {
@@ -290,16 +278,24 @@ def main():
             scene_suffix.append(".png")
             print(f"✓ {url.split('/')[-1]}")
 
-    # 4. Wait for audio
-    print("\n[4/4] Waiting for audio…")
+    # 3. TTS (should already be done — tiny model)
+    print("\n[3/4] Waiting for narration…")
     print("      TTS…", end=" ", flush=True)
     tts_url = wait(tts_id, label="TTS", headers=headers, poll=5, timeout=300)
     print(f"✓ {tts_url.split('/')[-1]}")
 
+    # 4. Music — generated sequentially AFTER video so AudioGen doesn't
+    #    compete with LTX-Video for MPS memory and CPU.
+    print(f"\n[4/4] Background music ({MUSIC_CLIPS} × {MUSIC_DURATION}s AudioGen, sequential)…")
     music_urls = []
-    for i, mid in enumerate(music_ids, 1):
-        print(f"      Music {i}…", end=" ", flush=True)
-        murl = wait(mid, label=f"Music {i}", headers=headers, poll=10, timeout=2400)
+    for i in range(1, MUSIC_CLIPS + 1):
+        print(f"      clip {i}/{MUSIC_CLIPS}…", end=" ", flush=True)
+        mid = submit("/v1/sound_effect", {
+            "promptText": "cinematic ambient orchestral music, sweeping strings, soft synth pads, emotional, dreamlike",
+            "duration": MUSIC_DURATION,
+            "model": "audiocraft_audiogen",
+        }, headers)
+        murl = wait(mid, label=f"Music {i}", headers=headers, poll=10, timeout=600)
         music_urls.append(murl)
         print(f"✓ {murl.split('/')[-1]}")
 
